@@ -5,23 +5,6 @@
     margin-bottom: 20px;
 }
 
-.commentBox {
-    border: 1px solid #ddd;
-    border-radius: 6px;
-    padding: 12px;
-    background-color: #fafafa;
-}
-
-.commentAuthor {
-    font-weight: 600;
-    margin-bottom: 4px;
-    color: #111;
-}
-
-.commentText {
-    color: #333;
-}
-
 .noComments {
     color: #666;
     font-style: italic;

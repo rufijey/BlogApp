@@ -1,4 +1,5 @@
 import type { Comment } from "../../../types/posts.ts";
+import CommentCard from "../CommentCard/CommentCard";
 import styles from "./CommentList.module.css";
 
 type Props = {
@@ -13,10 +14,7 @@ export default function CommentList({ comments }: Props) {
     return (
         <div className={styles.commentsContainer}>
             {comments.map((c) => (
-                <div key={c.id} className={styles.commentBox}>
-                    <div className={styles.commentAuthor}>{c.author}</div>
-                    <div className={styles.commentText}>{c.content}</div>
-                </div>
+                <CommentCard key={c.id} comment={c} />
             ))}
         </div>
     );

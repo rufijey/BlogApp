@@ -3,7 +3,14 @@ import type { NewComment, NewPost, Post, Comment, PaginatedPosts } from "../type
 
 export const postsApi = createApi({
     reducerPath: "postsApi",
-    baseQuery: fetchBaseQuery({ baseUrl: "http://localhost:3000" }),
+    baseQuery: fetchBaseQuery({
+        baseUrl: "http://localhost:3000",
+        prepareHeaders: (headers) => {
+            const token = localStorage.getItem("token");
+            if (token) headers.set("Authorization", `Bearer ${token}`);
+            return headers;
+        },
+    }),
     tagTypes: ["Post", "PostsList", "Comment"],
     endpoints: (builder) => ({
 

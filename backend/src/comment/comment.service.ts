@@ -12,18 +12,28 @@ export class CommentService {
 		@InjectRepository(Post) private postsRepo: Repository<Post>,
 	) {}
 
-	async addComment(postId: string, dto: CreateCommentDto): Promise<Comment> {
+	async addComment(
+		postId: string,
+		dto: CreateCommentDto,
+		userId: string,
+	): Promise<Comment> {
 		const post = await this.postsRepo.findOne({ where: { id: postId } });
 		if (!post) throw new NotFoundException('Post not found');
 
-		const comment = this.commentsRepo.create({ ...dto, post });
+
+		const comment = this.commentsRepo.create({
+			...dto,
+			post,
+			author: { id: userId },
+		});
 		return this.commentsRepo.save(comment);
 	}
 
 	async findByPost(postId: string): Promise<Comment[]> {
 		return this.commentsRepo.find({
 			where: { post: { id: postId } },
-			order: { id: 'DESC' },
+			relations: ['author'],
+			order: { createdAt: 'DESC' },
 		});
 	}
 }

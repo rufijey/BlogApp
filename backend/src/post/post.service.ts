@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+	Injectable,
+	NotFoundException,
+	ForbiddenException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, ILike } from 'typeorm';
 import { Post } from './post.entity';
@@ -23,7 +27,7 @@ export class PostService {
 
 		const [items, total] = await this.postsRepo.findAndCount({
 			where,
-			relations: ['comments'],
+			relations: ['comments', 'author'],
 			order: { createdAt: 'DESC' },
 			skip: (page - 1) * limit,
 			take: limit,
@@ -41,25 +45,39 @@ export class PostService {
 	async findOne(id: string): Promise<Post> {
 		const post = await this.postsRepo.findOne({
 			where: { id },
-			relations: ['comments'],
+			relations: ['comments', 'author'],
 		});
 		if (!post) throw new NotFoundException('Post not found');
 		return post;
 	}
 
-	create(dto: CreatePostDto): Promise<Post> {
-		const post = this.postsRepo.create(dto);
+	create(dto: CreatePostDto, userId: string): Promise<Post> {
+		console.log(userId);
+		const post = this.postsRepo.create({
+			...dto,
+			author: { id: userId },
+		});
 		return this.postsRepo.save(post);
 	}
 
-	async update(id: string, dto: UpdatePostDto): Promise<Post> {
-		await this.postsRepo.update(id, dto);
-		return this.findOne(id);
+	async update(
+		id: string,
+		dto: UpdatePostDto,
+		userId: string,
+	): Promise<Post> {
+		const post = await this.findOne(id);
+		if (post.author.id !== userId) {
+			throw new ForbiddenException('You are not the owner of this post');
+		}
+		Object.assign(post, dto);
+		return this.postsRepo.save(post);
 	}
 
-	async remove(id: string): Promise<void> {
-		const result = await this.postsRepo.delete(id);
-		if (result.affected === 0)
-			throw new NotFoundException('Post not found');
+	async remove(id: string, userId: string): Promise<void> {
+		const post = await this.findOne(id);
+		if (post.author.id !== userId) {
+			throw new ForbiddenException('You are not the owner of this post');
+		}
+		await this.postsRepo.remove(post);
 	}
 }

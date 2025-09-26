@@ -6,20 +6,25 @@ import {
 	CreateDateColumn,
 } from 'typeorm';
 import { Post } from '../post/post.entity';
+import { User } from '../auth/user.entity';
 
 @Entity()
 export class Comment {
 	@PrimaryGeneratedColumn('uuid')
 	id: string;
 
-	@Column({ length: 100 })
-	author: string;
-
 	@Column('text')
 	content: string;
 
 	@CreateDateColumn()
 	createdAt: Date;
+
+	@ManyToOne(() => User, (user) => user.comments, {
+		nullable: false,
+		eager: true,
+		onDelete: 'CASCADE',
+	})
+	author: User;
 
 	@ManyToOne(() => Post, (post) => post.comments, { onDelete: 'CASCADE' })
 	post: Post;

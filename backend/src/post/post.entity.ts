@@ -5,8 +5,10 @@ import {
 	OneToMany,
 	CreateDateColumn,
 	UpdateDateColumn,
+	ManyToOne,
 } from 'typeorm';
 import { Comment } from '../comment/comment.entity';
+import { User } from '../auth/user.entity';
 
 @Entity()
 export class Post {
@@ -24,6 +26,13 @@ export class Post {
 
 	@UpdateDateColumn()
 	updatedAt: Date;
+
+	@ManyToOne(() => User, (user) => user.posts, {
+		nullable: false,
+		eager: true,
+		onDelete: 'CASCADE',
+	})
+	author: User;
 
 	@OneToMany(() => Comment, (c) => c.post, { cascade: true })
 	comments: Comment[];
